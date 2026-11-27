@@ -258,7 +258,8 @@ var MODEL = (function () {
       maxDrag: maxDrag,
       vmax: vmax,
       k: vmax / maxDrag,
-      pickR: Math.max(6.5, 0.0245 * S)
+      pickR: Math.max(6.5, 0.0245 * S),
+      portrait: H > W * 1.15
     };
   }
 
@@ -288,15 +289,20 @@ var MODEL = (function () {
 
   function buildStage(index, env) {
     var W = env.W, H = env.H, S = env.S, gy = env.floorY;
+    /* portrait: a tall, narrow screen gets a smaller figure, so the throwing
+       hand, the props and the goal keep the same proportion as in landscape
+       (0.42 of the short side, the size the figure has in landscape) */
+    var POR = !!env.portrait;
     /* the sprite: 667x760 png, picking hand at (0.3433, 0.8724) of the image */
     var SPR_ASPECT = 0.8776;
     var HAND_NX = 0.3433, HAND_NY = 0.8724;
-    var charH = Math.min(S * 0.60, H * 0.42);
+    var charH = Math.min(S * (POR ? 0.42 : 0.60), H * 0.42);
     var charW = charH * SPR_ASPECT;
-    var charCx = Math.max(W * 0.22, charW * 0.5 + S * 0.03);
+    var charCx = Math.max(W * (POR ? 0.245 : 0.22), charW * 0.5 + S * 0.03);
     var charBaseY = gy - H * 0.035;
     var ax = charCx - charW * 0.5 + HAND_NX * charW;
     var ay = charBaseY - charH + HAND_NY * charH - charH * 0.012;
+    var MH2 = POR ? 0.29 : 0.265;
 
     var st = {
       index: index,
@@ -315,9 +321,9 @@ var MODEL = (function () {
       st.sub = '스테이지 모니터 위 팬 존에 피크를!';
       st.picksLeft = 3;
 
-      var GX = W * 0.735;
-      var mw = Math.min(S * 0.21, W * 0.24), mh = S * 0.105;
-      var gw = Math.min(S * 0.155, W * 0.17), gh = S * 0.10;
+      var GX = W * (POR ? 0.845 : 0.735);
+      var mw = Math.min(S * 0.21, W * (POR ? 0.26 : 0.24)), mh = S * (POR ? 0.18 : 0.105);
+      var gw = Math.min(S * (POR ? 0.105 : 0.155), W * (POR ? 0.16 : 0.17)), gh = S * 0.10;
 
       st.goal = { x: GX - gw / 2, y: gy - mh - gh, w: gw, h: gh, kind: 'fan', label: 'FAN ZONE' };
       st.obstacles.push(solid(GX - mw / 2, gy - mh, mw, mh, 'monitor', 0.45));
@@ -331,22 +337,22 @@ var MODEL = (function () {
       st.sub = '앰프와 마이크 스탠드를 넘어라!';
       st.picksLeft = 3;
 
-      var GX2 = W * 0.865;
-      var rw = Math.min(S * 0.21, W * 0.19), rh = S * 0.145;
-      var gw2 = Math.min(S * 0.155, W * 0.17), gh2 = S * 0.10;
+      var GX2 = W * (POR ? 0.87 : 0.865);
+      var rw = Math.min(S * 0.21, W * (POR ? 0.24 : 0.19)), rh = S * (POR ? 0.22 : 0.145);
+      var gw2 = Math.min(S * (POR ? 0.105 : 0.155), W * (POR ? 0.16 : 0.17)), gh2 = S * 0.10;
       st.goal = { x: GX2 - gw2 / 2, y: gy - rh - gh2, w: gw2, h: gh2, kind: 'fan', label: 'FAN ZONE' };
       st.obstacles.push(solid(GX2 - rw / 2, gy - rh, rw, rh, 'riser', 0.5));
 
       var span = GX2 - ax;
-      var a1w = Math.min(S * 0.17, span * 0.21), a1h = S * 0.255;
-      var a2w = Math.min(S * 0.125, span * 0.16), a2h = S * 0.145;
+      var a1w = Math.min(S * 0.17, span * 0.21), a1h = S * (POR ? 0.300 : 0.255);
+      var a2w = Math.min(S * 0.125, span * 0.16), a2h = S * (POR ? 0.175 : 0.145);
       var a1x = ax + span * 0.30;
       var a2x = ax + span * 0.555;
       var mx = ax + span * 0.755;
       st.obstacles.push(solid(a1x - a1w / 2, gy - a1h, a1w, a1h, 'amp', 0.5));
       st.obstacles.push(solid(a2x - a2w / 2, gy - a2h, a2w, a2h, 'amp', 0.5));
-      st.obstacles.push(solid(mx - S * 0.007, gy - S * 0.265, S * 0.014, S * 0.265, 'mic', 0.42));
-      st.obstacles.push(decor(mx - S * 0.03, gy - S * 0.265, S * 0.06, S * 0.03, 'michead'));
+      st.obstacles.push(solid(mx - S * 0.007, gy - S * MH2, S * 0.014, S * MH2, 'mic', 0.42));
+      st.obstacles.push(decor(mx - S * 0.03, gy - S * MH2, S * 0.06, S * 0.03, 'michead'));
       st.obstacles.push(decor(ax + span * 0.13, gy - S * 0.02, S * 0.055, S * 0.02, 'cable'));
 
     } else {
@@ -355,9 +361,9 @@ var MODEL = (function () {
       st.picksLeft = 4;
       st.windAmp = 0.070;
 
-      var GX3 = W * 0.795;
+      var GX3 = W * (POR ? 0.83 : 0.795);
       var span3 = GX3 - ax;
-      var lowTop = gy - S * 0.185, upTop = gy - S * 0.365;
+      var lowTop = gy - S * (POR ? 0.19 : 0.185), upTop = gy - S * (POR ? 0.4 : 0.365);
       var lowL = ax + span3 * 0.27, lowR = ax + span3 * 0.70;
       var upL = ax + span3 * 0.47, upR = Math.min(W * 0.955, GX3 + span3 * 0.45);
       /* lower deck */
