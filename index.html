@@ -326,7 +326,8 @@ var MODEL = (function () {
       var gw = Math.min(S * (POR ? 0.105 : 0.155), W * (POR ? 0.16 : 0.17)), gh = S * 0.10;
 
       var mBase = gy;
-      if (POR && 0.14 > 0) {
+      if (POR) {
+        /* portrait: the fan zone sits on a road case, so the pick has to arc up */
         var rw1 = Math.min(W * 0.30, mw * 1.14), rh1 = S * 0.14;
         st.obstacles.push(solid(GX - rw1 / 2, gy - rh1, rw1, rh1, 'riser', 0.5));
         mBase = gy - rh1;
