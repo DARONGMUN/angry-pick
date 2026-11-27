@@ -289,9 +289,9 @@ var MODEL = (function () {
 
   function buildStage(index, env) {
     var W = env.W, H = env.H, S = env.S, gy = env.floorY;
-    /* portrait: a tall, narrow screen gets a smaller figure, so the throwing
-       hand, the props and the goal keep the same proportion as in landscape
-       (0.42 of the short side, the size the figure has in landscape) */
+    /* portrait: a tall, narrow screen needs a smaller figure, so that the
+       figure, the props and the goal keep the proportion they have in
+       landscape (0.42 of the short side = the figure's landscape size) */
     var POR = !!env.portrait;
     /* the sprite: 667x760 png, picking hand at (0.3433, 0.8724) of the image */
     var SPR_ASPECT = 0.8776;
@@ -322,11 +322,17 @@ var MODEL = (function () {
       st.picksLeft = 3;
 
       var GX = W * (POR ? 0.845 : 0.735);
-      var mw = Math.min(S * 0.21, W * (POR ? 0.26 : 0.24)), mh = S * (POR ? 0.18 : 0.105);
+      var mw = Math.min(S * 0.21, W * (POR ? 0.26 : 0.24)), mh = S * 0.105;
       var gw = Math.min(S * (POR ? 0.105 : 0.155), W * (POR ? 0.16 : 0.17)), gh = S * 0.10;
 
-      st.goal = { x: GX - gw / 2, y: gy - mh - gh, w: gw, h: gh, kind: 'fan', label: 'FAN ZONE' };
-      st.obstacles.push(solid(GX - mw / 2, gy - mh, mw, mh, 'monitor', 0.45));
+      var mBase = gy;
+      if (POR && 0.14 > 0) {
+        var rw1 = Math.min(W * 0.30, mw * 1.14), rh1 = S * 0.14;
+        st.obstacles.push(solid(GX - rw1 / 2, gy - rh1, rw1, rh1, 'riser', 0.5));
+        mBase = gy - rh1;
+      }
+      st.goal = { x: GX - gw / 2, y: mBase - mh - gh, w: gw, h: gh, kind: 'fan', label: 'FAN ZONE' };
+      st.obstacles.push(solid(GX - mw / 2, mBase - mh, mw, mh, 'monitor', 0.45));
       /* decor */
       st.obstacles.push(decor(GX - mw * 0.75, gy - S * 0.045, S * 0.026, S * 0.045, 'bottle'));
       st.obstacles.push(decor(ax + S * 0.02, gy - S * 0.012, S * 0.06, S * 0.012, 'cable'));
